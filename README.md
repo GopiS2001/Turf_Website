@@ -1,38 +1,99 @@
 # 90s Turf — Website
 
-Single-page customer website for 90s Turf (Next.js 16 App Router, TypeScript, Tailwind CSS v4).
+Customer website for **90s Turf**, a floodlit 5-a-side / 7-a-side football and box cricket turf in Salem, Tamil Nadu. Visitors can browse services, pricing and the gallery, check slot availability, and book an hourly slot online.
 
-## Run
+Built with **Next.js 16** (App Router), **React 19**, **TypeScript** and **Tailwind CSS v4**.
+
+## Features
+
+- Single-page site: Hero, Quick availability check, About, Services, Pricing, Gallery, Reviews, Booking, Contact
+- Online slot booking with live price calculation (day/night rates) and a confirmation modal
+- Enquiry form, click-to-call, WhatsApp and Google Maps directions
+- Gallery lightbox and testimonial carousel
+- Sticky header with scroll-spy and a mobile menu
+- SEO metadata and JSON-LD structured data
+- **Demo mode** — runs with no backend at all, using built-in sample data
+
+## Getting started
+
+Requires Node.js 20 or newer.
 
 ```bash
 npm install
-npm run dev      # http://localhost:3000
-npm run build && npm start
+cp .env.example .env.local
+npm run dev            # http://localhost:3000
 ```
 
-## Data source
+Production build:
 
-Copy `.env.example` to `.env.local`.
+```bash
+npm run build
+npm start
+```
 
-- `NEXT_PUBLIC_API_URL` empty → **demo mode**: content comes from `src/lib/mock/data.ts`; bookings are saved in the browser's `localStorage`.
-- `NEXT_PUBLIC_API_URL=http://localhost:4000/api` → uses the NestJS backend (`/public/*` endpoints, see `../PROJECT_PLAN.md`).
+| Script | What it does |
+|---|---|
+| `npm run dev` | Start the dev server |
+| `npm run build` | Create a production build |
+| `npm start` | Serve the production build |
+| `npm run lint` | Run ESLint |
 
-## Where to edit
+## Configuration
+
+Set these in `.env.local` (see `.env.example`):
+
+| Variable | Purpose |
+|---|---|
+| `NEXT_PUBLIC_API_URL` | Booking API base URL, e.g. `http://localhost:4000/api`. **Leave empty for demo mode.** |
+| `NEXT_PUBLIC_SITE_URL` | Public site URL, used for social preview links |
+
+### Demo mode vs. live API
+
+- **Demo mode** (`NEXT_PUBLIC_API_URL` empty): content comes from `src/lib/mock/data.ts`, and bookings are saved in the browser's `localStorage`.
+- **Live mode**: the site calls a REST API that provides these endpoints:
+
+  | Method | Endpoint | Used for |
+  |---|---|---|
+  | GET | `/public/services` | Services section |
+  | GET | `/public/pricing` | Pricing plans |
+  | GET | `/public/gallery` | Gallery images |
+  | GET | `/public/reviews` | Testimonials |
+  | GET | `/public/slots?date=YYYY-MM-DD` | Slot availability |
+  | POST | `/public/bookings` | Create a booking |
+  | POST | `/public/enquiries` | Send an enquiry |
+
+  If the content endpoints can't be reached, the page falls back to the built-in content instead of failing.
+
+## Customising
 
 | What | File |
 |---|---|
-| Phone, WhatsApp, address, email, socials, map pin (`map.lat`, `map.lng`, `map.placeUrl`) | `src/lib/site.ts` |
+| Phone, WhatsApp, address, email, social links, map location | `src/lib/site.ts` |
 | Services, pricing plans, gallery, reviews (demo data) | `src/lib/mock/data.ts` |
-| Opening hours, night-rate start, max booking length | `src/lib/pricing.ts` |
-| Theme colors and fonts | `src/app/globals.css` (`@theme`) and `src/app/layout.tsx` |
-| Images | `public/images/` (Unsplash photos — replace with real turf photos) |
+| Opening hours, night-rate start time, booking rules | `src/lib/pricing.ts` |
+| Theme colours and fonts | `src/app/globals.css` (`@theme`) and `src/app/layout.tsx` |
+| Images | `public/images/` |
 
-## Structure
+## Project structure
 
 ```
-src/app/                 layout (fonts, SEO, JSON-LD), page (all sections)
-src/components/layout/   Header (scroll-spy, mobile menu), Footer, FloatingActions
-src/components/sections/ Hero, QuickCheck, About, Services, Pricing, Gallery,
-                         Testimonials, Booking, BookingConfirmationModal, CtaBand, Contact
-src/lib/                 api.ts (mock/API switch), pricing.ts, validation.ts (zod), site.ts, types.ts
+src/
+├── app/                  layout (fonts, SEO, JSON-LD), page (all sections), global styles
+├── components/
+│   ├── layout/           Header, Footer, FloatingActions
+│   ├── sections/         Hero, QuickCheck, About, Services, Pricing, Gallery,
+│   │                     Testimonials, Booking, BookingConfirmationModal, CtaBand, Contact
+│   └── ui/               Logo, SectionTitle, SocialIcons
+└── lib/
+    ├── api.ts            API client with demo-mode switch
+    ├── mock/             Demo data and local booking store
+    ├── pricing.ts        Opening hours and price calculation
+    ├── validation.ts     Form schemas (zod)
+    ├── site.ts           Business details
+    └── types.ts          Shared types
+public/                   Icon and images
 ```
+
+## Deployment
+
+The site is a standard Next.js app and deploys as-is to Vercel or any Node.js host. Set `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_SITE_URL` in the host's environment settings. Leave the API URL empty to deploy in demo mode.
